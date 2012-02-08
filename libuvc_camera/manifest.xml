@@ -1,0 +1,16 @@
+<package>
+  <description brief="libuvc_camera">
+
+     ROS camera driver using libusb
+
+  </description>
+  <author></author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/libuvc_camera</url>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="libuvc"/>
+</package>
+
+

@@ -1,0 +1,18 @@
+<package>
+  <description brief="libuvc">
+
+     Device driver library for USB Video Class devices.
+
+  </description>
+  <author>Ken Tossell</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/libuvc</url>
+  <export>
+    <cpp cflags="-I${prefix}/libuvc/include" lflags="-L${prefix}/libuvc/lib -Wl,-rpath,-L${prefix}/libuvc/lib -lros"/>
+    <cpp os="osx" cflags="-I${prefix}/libuvc/include" lflags="-L${prefix}/libuvc/lib -Wl,-rpath,-L${prefix}/libuvc/lib -lrosthread -framework CoreServices"/>
+  </export>
+  <rosdep name="libusb-1.0"/>
+</package>
+
+

@@ -1,0 +1,9 @@
+<stack>
+  <description brief="libuvc_ros">libuvc in ROS</description>
+  <author>Maintained by Ken Tossell</author>
+  <license></license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/libuvc_ros</url>
+  <depend stack="ros" />
+
+</stack>
