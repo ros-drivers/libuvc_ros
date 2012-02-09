@@ -30,5 +30,5 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(libuvc_camera src/libuvc_camera.cpp)
-
+target_link_libraries(libuvc_camera uvc)
 
