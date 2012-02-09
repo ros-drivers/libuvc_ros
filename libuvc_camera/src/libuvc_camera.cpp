@@ -3,6 +3,8 @@
 #include <sensor_msgs/Image.h>
 #include "libuvc/libuvc.h"
 
+using std::string;
+
 ros::Publisher pub;
 
 void cb(uvc_frame_t *frame) {
@@ -33,6 +35,7 @@ void cb(uvc_frame_t *frame) {
 int main (int argc, char **argv) {
   ros::init(argc, argv, "libuvc_camera");
   ros::NodeHandle nh;
+  ros::NodeHandle priv_nh("~");
 
   pub = nh.advertise<sensor_msgs::Image>("image_raw", 1);
 
@@ -50,12 +53,28 @@ int main (int argc, char **argv) {
   }
 
   puts("UVC initialized");
+
+  int vendor_id;
+  string vendor_id_str;
+  priv_nh.getParam("vendor", vendor_id_str);
+  vendor_id = strtol(vendor_id_str.c_str(), NULL, 0);
+
+  int product_id;
+  string product_id_str;
+  priv_nh.getParam("product", product_id_str);
+  product_id = strtol(product_id_str.c_str(), NULL, 0);
+
+  string serial_num;
+  priv_nh.getParam("serial", serial_num);
+
+  printf("pid: %d\n", product_id);
+  printf("vid: %d\n", vendor_id);
   
   res = uvc_find_device(
     ctx, &dev,
-    0,      // vendor
-    0,      // product
-    NULL);  // serial number (string)
+    vendor_id,
+    product_id,
+    serial_num.empty() ? NULL : serial_num.c_str());
 
   if (res < 0) {
     uvc_perror(res, "uvc_find_device");
