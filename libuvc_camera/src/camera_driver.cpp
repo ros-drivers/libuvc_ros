@@ -27,6 +27,8 @@ CameraDriver::~CameraDriver() {
 }
 
 bool CameraDriver::Start() {
+  assert(state_ == kInitial);
+
   uvc_error_t err;
 
   err = uvc_init(&ctx_, NULL);
@@ -186,6 +188,9 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
     uvc_unref_device(dev_);
     return;
   }
+
+  if (rgb_frame_)
+    uvc_free_frame(rgb_frame_);
 
   rgb_frame_ = uvc_allocate_frame(new_config.width * new_config.height * 3);
   assert(rgb_frame_);
