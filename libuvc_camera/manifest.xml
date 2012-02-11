@@ -9,6 +9,9 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/libuvc_camera</url>
   <depend package="roscpp"/>
+  <depend package="driver_base"/>
+  <depend package="dynamic_reconfigure"/>
+  <depend package="image_transport"/>
   <depend package="sensor_msgs"/>
   <depend package="libuvc"/>
 </package>
