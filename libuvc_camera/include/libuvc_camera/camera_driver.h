@@ -33,8 +33,17 @@ private:
   // Accept a reconfigure request from a client
   void ReconfigureCallback(UVCCameraConfig &config, uint32_t level);
   // Accept changes in values of automatically updated controls
-  void AutoControlsCallback();
-  static void AutoControlsCallbackAdapter(void *ptr);
+  void AutoControlsCallback(enum uvc_status_class status_class,
+                            int event,
+                            int selector,
+                            enum uvc_status_attribute status_attribute,
+                            void *data, size_t data_len);
+  static void AutoControlsCallbackAdapter(enum uvc_status_class status_class,
+                                          int event,
+                                          int selector,
+                                          enum uvc_status_attribute status_attribute,
+                                          void *data, size_t data_len,
+                                          void *ptr);
   // Accept a new image frame from the camera
   void ImageCallback(uvc_frame_t *frame);
   static void ImageCallbackAdapter(uvc_frame_t *frame, void *ptr);
@@ -42,7 +51,7 @@ private:
   ros::NodeHandle nh_, priv_nh_;
 
   State state_;
-  boost::mutex mutex_;
+  boost::recursive_mutex mutex_;
 
   uvc_context_t *ctx_;
   uvc_device_t *dev_;
@@ -54,6 +63,7 @@ private:
 
   dynamic_reconfigure::Server<UVCCameraConfig> config_server_;
   UVCCameraConfig config_;
+  bool config_changed_;
 };
 
 };

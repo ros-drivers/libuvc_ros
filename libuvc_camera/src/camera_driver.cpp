@@ -14,7 +14,8 @@ CameraDriver::CameraDriver(ros::NodeHandle nh, ros::NodeHandle priv_nh)
     state_(kInitial),
     ctx_(NULL), dev_(NULL), devh_(NULL), rgb_frame_(NULL),
     it_(nh_),
-    config_server_(priv_nh_) {
+    config_server_(mutex_, priv_nh_),
+    config_changed_(false) {
   cam_pub_ = it_.advertiseCamera("image_raw", 1, false);
 }
 
@@ -46,7 +47,7 @@ bool CameraDriver::Start() {
 }
 
 void CameraDriver::Stop() {
-  boost::mutex::scoped_lock(mutex_);
+  boost::recursive_mutex::scoped_lock(mutex_);
 
   if (state_ == kRunning) {
     CloseCamera();
@@ -55,7 +56,7 @@ void CameraDriver::Stop() {
 }
 
 void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t level) {
-  boost::mutex::scoped_lock(mutex_);
+  boost::recursive_mutex::scoped_lock(mutex_);
 
   if (level & dynamic_reconfigure::SensorLevels::RECONFIGURE_CLOSE) {
     if (state_ == kRunning)
@@ -69,6 +70,10 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
   if (state_ == kRunning) {
     // TODO: scanning_mode
     // TODO: auto_exposure
+    if (new_config.auto_exposure != config_.auto_exposure) {
+      if (uvc_set_ae_mode(devh_, 1 << new_config.auto_exposure))
+        ROS_WARN("Unable to set auto_exposure to %d", new_config.auto_exposure);
+    }
     // TODO: auto_exposure_priority
     // TODO: exposure_absolute
     // TODO: iris_absolute
@@ -97,7 +102,7 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
 }
 
 void CameraDriver::ImageCallback(uvc_frame_t *frame) {
-  boost::mutex::scoped_lock(mutex_);
+  boost::recursive_mutex::scoped_lock(mutex_);
 
   assert(state_ == kRunning);
   assert(rgb_frame_);
@@ -118,6 +123,11 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   memcpy(&(image.data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
 
   cam_pub_.publish(image, sensor_msgs::CameraInfo());
+
+  if (config_changed_) {
+    config_server_.updateConfig(config_);
+    config_changed_ = false;
+  }
 }
 
 /* static */ void CameraDriver::ImageCallbackAdapter(uvc_frame_t *frame, void *ptr) {
@@ -126,15 +136,59 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   driver->ImageCallback(frame);
 }
 
-void CameraDriver::AutoControlsCallback() {
-  boost::mutex::scoped_lock(mutex_);
+void CameraDriver::AutoControlsCallback(
+  enum uvc_status_class status_class,
+  int event,
+  int selector,
+  enum uvc_status_attribute status_attribute,
+  void *data, size_t data_len) {
+  boost::recursive_mutex::scoped_lock(mutex_);
 
+  printf("Controls callback. class: %d, event: %d, selector: %d, attr: %d, data_len: %u\n",
+         status_class, event, selector, status_attribute, data_len);
+
+  if (status_attribute == UVC_STATUS_ATTRIBUTE_VALUE_CHANGE) {
+    switch (status_class) {
+    case UVC_STATUS_CLASS_CONTROL_CAMERA: {
+      switch (selector) {
+      case UVC_CT_EXPOSURE_TIME_ABSOLUTE_CONTROL:
+        uint8_t *data_char = (uint8_t*) data;
+        uint32_t exposure_int = ((data_char[0]) | (data_char[1] << 8) |
+                                 (data_char[2] << 16) | (data_char[3] << 24));
+        config_.exposure_absolute = exposure_int * 0.0001;
+        config_changed_ = true;
+        break;
+      }
+      break;
+    }
+    case UVC_STATUS_CLASS_CONTROL_PROCESSING: {
+      switch (selector) {
+      case UVC_PU_WHITE_BALANCE_TEMPERATURE_CONTROL:
+        uint8_t *data_char = (uint8_t*) data;
+        config_.white_balance_temperature = 
+          data_char[0] | (data_char[1] << 8);
+        config_changed_ = true;
+        break;
+      }
+      break;
+    }
+    }
+
+    // config_server_.updateConfig(config_);
+  }
 }
 
-/* static */ void CameraDriver::AutoControlsCallbackAdapter(void *ptr) {
+/* static */ void CameraDriver::AutoControlsCallbackAdapter(
+  enum uvc_status_class status_class,
+  int event,
+  int selector,
+  enum uvc_status_attribute status_attribute,
+  void *data, size_t data_len,
+  void *ptr) {
   CameraDriver *driver = static_cast<CameraDriver*>(ptr);
 
-  driver->AutoControlsCallback();
+  driver->AutoControlsCallback(status_class, event, selector,
+                               status_attribute, data, data_len);
 }
 
 void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
@@ -165,6 +219,8 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
     uvc_unref_device(dev_);
     return;
   }
+
+  uvc_set_status_callback(devh_, &CameraDriver::AutoControlsCallbackAdapter, this);
 
   uvc_stream_ctrl_t ctrl;
   uvc_error_t mode_err = uvc_get_stream_ctrl_format_size(
