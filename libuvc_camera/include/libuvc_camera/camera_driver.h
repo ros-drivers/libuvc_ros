@@ -6,6 +6,7 @@
 #include <image_transport/image_transport.h>
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
+#include <camera_info_manager/camera_info_manager.h>
 #include <boost/thread/mutex.hpp>
 
 #include <libuvc_camera/UVCCameraConfig.h>
@@ -64,6 +65,8 @@ private:
   dynamic_reconfigure::Server<UVCCameraConfig> config_server_;
   UVCCameraConfig config_;
   bool config_changed_;
+
+  camera_info_manager::CameraInfoManager cinfo_manager_;
 };
 
 };

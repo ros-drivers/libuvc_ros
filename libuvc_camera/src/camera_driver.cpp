@@ -15,7 +15,8 @@ CameraDriver::CameraDriver(ros::NodeHandle nh, ros::NodeHandle priv_nh)
     ctx_(NULL), dev_(NULL), devh_(NULL), rgb_frame_(NULL),
     it_(nh_),
     config_server_(mutex_, priv_nh_),
-    config_changed_(false) {
+    config_changed_(false),
+    cinfo_manager_(nh) {
   cam_pub_ = it_.advertiseCamera("image_raw", 1, false);
 }
 
@@ -66,6 +67,9 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
   if (state_ == kStopped) {
     OpenCamera(new_config);
   }
+
+  if (new_config.camera_info_url != config_.camera_info_url)
+    cinfo_manager_.loadCameraInfo(new_config.camera_info_url);
 
   if (state_ == kRunning) {
     // TODO: scanning_mode
@@ -122,7 +126,7 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   image.data.resize(image.step * image.height);
   memcpy(&(image.data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
 
-  cam_pub_.publish(image, sensor_msgs::CameraInfo());
+  cam_pub_.publish(image, cinfo_manager_.getCameraInfo());
 
   if (config_changed_) {
     config_server_.updateConfig(config_);
