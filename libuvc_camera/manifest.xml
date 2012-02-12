@@ -1,10 +1,10 @@
 <package>
-  <description brief="libuvc_camera">
-
-     ROS camera driver using libusb
-
+  <description brief="driver for USB video cameras">
+    This is a ROS driver for USB video cameras (webcams)
+    and other media input devices that support the USB Video Class
+    specification.
   </description>
-  <author></author>
+  <author>Ken Tossell</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/libuvc_camera</url>
