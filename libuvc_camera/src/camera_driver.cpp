@@ -50,10 +50,15 @@ bool CameraDriver::Start() {
 void CameraDriver::Stop() {
   boost::recursive_mutex::scoped_lock(mutex_);
 
-  if (state_ == kRunning) {
+  assert(state_ != kInitial);
+
+  if (state_ == kRunning)
     CloseCamera();
-    state_ = kInitial;
-  }
+
+  assert(state_ == kStopped);
+
+  uvc_exit(ctx_);
+  ctx_ = NULL;
 }
 
 void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t level) {
