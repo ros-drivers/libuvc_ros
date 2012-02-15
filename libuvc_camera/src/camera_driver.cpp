@@ -59,6 +59,8 @@ void CameraDriver::Stop() {
 
   uvc_exit(ctx_);
   ctx_ = NULL;
+
+  state_ = kInitial;
 }
 
 void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t level) {
