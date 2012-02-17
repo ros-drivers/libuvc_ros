@@ -9,7 +9,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/libuvc</url>
   <export>
-    <cpp cflags="-I${prefix}/libuvc/include" lflags="-L${prefix}/libuvc/lib -Wl,-rpath,-L${prefix}/libuvc/lib -lros"/>
+    <cpp cflags="-I${prefix}/libuvc/include" lflags="-L${prefix}/libuvc/lib -Wl,-rpath,-L${prefix}/libuvc/lib"/>
     <cpp os="osx" cflags="-I${prefix}/libuvc/include" lflags="-L${prefix}/libuvc/lib -Wl,-rpath,-L${prefix}/libuvc/lib -lrosthread -framework CoreServices"/>
   </export>
   <rosdep name="libusb-1.0"/>
