@@ -13,8 +13,12 @@
   <depend package="driver_base"/>
   <depend package="dynamic_reconfigure"/>
   <depend package="image_transport"/>
+  <depend package="nodelet"/>
   <depend package="sensor_msgs"/>
   <depend package="libuvc"/>
+  <export>
+    <nodelet plugin="${prefix}/libuvc_camera_nodelet.xml"/>
+  </export>
 </package>
 
 

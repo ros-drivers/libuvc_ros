@@ -36,3 +36,5 @@ gencfg()
 rosbuild_add_executable(camera_node src/main.cpp src/camera_driver.cpp)
 target_link_libraries(camera_node uvc)
 
+rosbuild_add_library(libuvc_camera_nodelet src/nodelet.cpp src/camera_driver.cpp)
+target_link_libraries(libuvc_camera_nodelet uvc)

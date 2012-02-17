@@ -125,15 +125,18 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
     return;
   }
 
-  sensor_msgs::Image image;
-  image.width = config_.width;
-  image.height = config_.height;
-  image.encoding = "rgb8";
-  image.step = image.width * 3;
-  image.data.resize(image.step * image.height);
-  memcpy(&(image.data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+  sensor_msgs::Image::Ptr image(new sensor_msgs::Image());
+  image->width = config_.width;
+  image->height = config_.height;
+  image->encoding = "rgb8";
+  image->step = image->width * 3;
+  image->data.resize(image->step * image->height);
+  memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
 
-  cam_pub_.publish(image, cinfo_manager_.getCameraInfo());
+  sensor_msgs::CameraInfo::ConstPtr cinfo(
+    new sensor_msgs::CameraInfo(cinfo_manager_.getCameraInfo()));
+
+  cam_pub_.publish(image, cinfo);
 
   if (config_changed_) {
     config_server_.updateConfig(config_);
