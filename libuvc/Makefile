@@ -12,6 +12,11 @@ all:
 	mkdir -p build/build
 	cd build/build && $(CMAKE) ../git $(CMAKE_ARGS)
 	cd build/build && make && make install
+	
+	# you shouldn't have to do this, but it works for the Mac
+	if [ `uname` = Darwin ]; then \
+		install_name_tool -id `rospack find libuvc`/libuvc/lib/libuvc.dylib `rospack find libuvc`/libuvc/lib/libuvc.dylib; \
+	fi
 
 clean:
 	rm -rf build libuvc
