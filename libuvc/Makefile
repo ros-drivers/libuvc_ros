@@ -1,8 +1,9 @@
 #include $(shell rospack find mk)/cmake.mk
 .PHONY: clean download
 
+BUILD_TYPE?=Release
 CMAKE=cmake
-CMAKE_ARGS=-DCMAKE_BUILD_TYPE=Release \
+CMAKE_ARGS=-DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
 	   -DCMAKE_INSTALL_PREFIX=`rospack find libuvc`/libuvc
 
 all:
@@ -19,5 +20,5 @@ all:
 	fi
 
 clean:
-	rm -rf build libuvc
+	rm -rf build/build libuvc
 
