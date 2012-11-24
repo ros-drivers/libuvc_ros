@@ -1,0 +1,13 @@
+uri: 'file:///k/proj/ros/libuvc-ros.tar.gz'
+install-script: |
+  #!/bin/bash
+  makepkg -i
+check-presence-script: |
+  #!/bin/bash
+  if pacman -Q libuvc; then
+    exit 0
+  else
+    exit 1
+  fi
+exec-path: libuvc-ros
+depends: [libusbx]
