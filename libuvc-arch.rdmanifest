@@ -10,4 +10,4 @@ check-presence-script: |
     exit 1
   fi
 exec-path: libuvc-arch
-depends: [libusbx]
+depends: [libusb-1.0-dev]
