@@ -6,7 +6,8 @@ find_package(catkin REQUIRED COMPONENTS roscpp camera_info_manager driver_base d
 
 generate_dynamic_reconfigure_options(cfg/UVCCamera.cfg)
 
-#find_package(libuvc REQUIRED)
+find_package(libuvc REQUIRED)
+
 catkin_package(
   CATKIN_DEPENDS
     roscpp
@@ -19,18 +20,18 @@ catkin_package(
   LIBRARIES libuvc_camera_nodelet
   )
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${libuvc_INCLUDE_DIRS})
 link_directories(${catkin_LINK_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(camera_node src/main.cpp src/camera_driver.cpp)
-target_link_libraries(camera_node uvc ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(camera_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${libuvc_LIBRARIES})
 
 add_library(libuvc_camera_nodelet src/nodelet.cpp src/camera_driver.cpp)
 add_dependencies(libuvc_camera_nodelet ${libuvc_camera_EXPORTED_TARGETS})
-target_link_libraries(libuvc_camera_nodelet uvc ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(libuvc_camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${libuvc_LIBRARIES})
 
 install(TARGETS camera_node libuvc_camera_nodelet
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
