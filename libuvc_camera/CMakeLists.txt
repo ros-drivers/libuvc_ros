@@ -28,10 +28,12 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(camera_node src/main.cpp src/camera_driver.cpp)
 target_link_libraries(camera_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${libuvc_LIBRARIES})
+add_dependencies(camera_node ${PROJECT_NAME}_gencfg)
 
 add_library(libuvc_camera_nodelet src/nodelet.cpp src/camera_driver.cpp)
 add_dependencies(libuvc_camera_nodelet ${libuvc_camera_EXPORTED_TARGETS})
 target_link_libraries(libuvc_camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${libuvc_LIBRARIES})
+add_dependencies(camera_nodelet ${PROJECT_NAME}_gencfg)
 
 install(TARGETS camera_node libuvc_camera_nodelet
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
