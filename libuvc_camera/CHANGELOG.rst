@@ -2,6 +2,10 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.4 (2013-09-23)
+------------------
+* Added libuvc_ in libuvc_camera_nodelet
+
 0.0.3 (2013-09-23)
 ------------------
 * add an explicit dependency on generated files in CMake
