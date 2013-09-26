@@ -146,6 +146,9 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
 }
 
 void CameraDriver::ImageCallback(uvc_frame_t *frame) {
+  // TODO: Switch to {frame}'s timestamp once that becomes reliable.
+  ros::Time timestamp = ros::Time::now();
+
   boost::recursive_mutex::scoped_lock(mutex_);
 
   assert(state_ == kRunning);
@@ -168,6 +171,11 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
 
   sensor_msgs::CameraInfo::ConstPtr cinfo(
     new sensor_msgs::CameraInfo(cinfo_manager_.getCameraInfo()));
+
+  image->header.frame_id = config_.frame_id;
+  image->header.stamp = timestamp;
+  cinfo->header.frame_id = config_.frame_id;
+  cinfo->header.stamp = timestamp;
 
   cam_pub_.publish(image, cinfo);
 
