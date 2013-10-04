@@ -35,6 +35,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <std_msgs/Header.h>
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
 #include <dynamic_reconfigure/SensorLevels.h>
@@ -169,7 +170,7 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   image->data.resize(image->step * image->height);
   memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
 
-  sensor_msgs::CameraInfo::ConstPtr cinfo(
+  sensor_msgs::CameraInfo::Ptr cinfo(
     new sensor_msgs::CameraInfo(cinfo_manager_.getCameraInfo()));
 
   image->header.frame_id = config_.frame_id;
