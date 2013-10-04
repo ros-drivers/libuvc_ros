@@ -2,6 +2,11 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.5 (2013-10-04)
+------------------
+* Fixed missing timestamp and frame_id in camera_info and image_raw
+* Install camera_node into the package's bin path, not ros-global bin.
+
 0.0.4 (2013-09-23)
 ------------------
 * Added libuvc_ in libuvc_camera_nodelet
