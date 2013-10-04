@@ -35,6 +35,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <std_msgs/Header.h>
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
 #include <dynamic_reconfigure/SensorLevels.h>
@@ -158,6 +159,8 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
     return;
   }
 
+  ros::Time timestamp = ros::Time::now();
+
   sensor_msgs::Image::Ptr image(new sensor_msgs::Image());
   image->width = config_.width;
   image->height = config_.height;
@@ -166,8 +169,17 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   image->data.resize(image->step * image->height);
   memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
 
-  sensor_msgs::CameraInfo::ConstPtr cinfo(
+  sensor_msgs::CameraInfo::Ptr cinfo(
     new sensor_msgs::CameraInfo(cinfo_manager_.getCameraInfo()));
+
+  std_msgs::Header::Ptr imageheader(new std_msgs::Header());
+  std_msgs::Header::Ptr cinfoheader(new std_msgs::Header());
+  imageheader->frame_id = config_.frame_id;
+  cinfoheader->frame_id = config_.frame_id;
+  imageheader->stamp = timestamp;
+  cinfoheader->stamp = timestamp;
+  image->header = *imageheader;
+  cinfo->header = *cinfoheader;
 
   cam_pub_.publish(image, cinfo);
 
