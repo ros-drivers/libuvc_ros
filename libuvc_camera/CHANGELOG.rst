@@ -2,6 +2,10 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.6 (2013-12-19)
+------------------
+* Install libuvc_camera_nodelet.xml
+
 0.0.5 (2013-10-04)
 ------------------
 * Fixed missing timestamp and frame_id in camera_info and image_raw
