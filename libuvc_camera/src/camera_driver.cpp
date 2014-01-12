@@ -271,7 +271,29 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
 
   uvc_error_t open_err = uvc_open(dev_, &devh_);
   if (open_err != UVC_SUCCESS) {
-    uvc_perror(open_err, "uvc_open");
+    switch (open_err) {
+    case UVC_ERROR_ACCESS:
+#ifdef __linux__
+      ROS_ERROR("Permission denied opening /dev/bus/usb/%03d/%03d",
+                uvc_get_bus_number(dev_), uvc_get_device_address(dev_));
+#else
+      ROS_ERROR("Permission denied opening device %d on bus %d",
+                uvc_get_device_address(dev_), uvc_get_bus_number(dev_));
+#endif
+      break;
+    default:
+#ifdef __linux__
+      ROS_ERROR("Can't open /dev/bus/usb/%03d/%03d: %s (%d)",
+                uvc_get_bus_number(dev_), uvc_get_device_address(dev_),
+                uvc_strerror(open_err), open_err);
+#else
+      ROS_ERROR("Can't open device %d on bus %d: %s (%d)",
+                uvc_get_device_address(dev_), uvc_get_bus_number(dev_),
+                uvc_strerror(open_err), open_err);
+#endif
+      break;
+    }
+
     uvc_unref_device(dev_);
     return;
   }
