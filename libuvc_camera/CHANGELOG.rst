@@ -2,6 +2,11 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.7 (2014-03-06)
+------------------
+* Removed dependency on the deprecated driver_base package.
+* Added more informative error messages in the case of uvc_open() failure
+
 0.0.6 (2013-12-19)
 ------------------
 * Install libuvc_camera_nodelet.xml
