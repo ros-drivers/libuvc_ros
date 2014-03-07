@@ -38,7 +38,6 @@
 #include <std_msgs/Header.h>
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
-#include <dynamic_reconfigure/SensorLevels.h>
 #include <libuvc/libuvc.h>
 
 namespace libuvc_camera {
@@ -100,7 +99,7 @@ void CameraDriver::Stop() {
 void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t level) {
   boost::recursive_mutex::scoped_lock(mutex_);
 
-  if (level & dynamic_reconfigure::SensorLevels::RECONFIGURE_CLOSE) {
+  if ((level & kReconfigureClose) == kReconfigureClose) {
     if (state_ == kRunning)
       CloseCamera();
   }

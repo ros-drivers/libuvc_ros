@@ -35,7 +35,6 @@
   <!--   <build_depend>message_generation</build_depend> -->
   <build_depend>roscpp</build_depend>
   <build_depend>camera_info_manager</build_depend>
-  <build_depend>driver_base</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>libuvc</build_depend>
@@ -48,7 +47,6 @@
   <!--   <run_depend>message_runtime</run_depend> -->
   <run_depend>roscpp</run_depend>
   <run_depend>camera_info_manager</run_depend>
-  <run_depend>driver_base</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>image_transport</run_depend>
   <run_depend>libuvc</run_depend>

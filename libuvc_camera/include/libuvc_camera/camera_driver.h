@@ -28,6 +28,11 @@ private:
     kRunning = 2,
   };
 
+  // Flags controlling whether the sensor needs to be stopped (or reopened) when changing settings
+  static const int kReconfigureClose = 3; // Need to close and reopen sensor to change this setting
+  static const int kReconfigureStop = 1; // Need to stop the stream before changing this setting
+  static const int kReconfigureRunning = 0; // We can change this setting without stopping the stream
+
   void OpenCamera(UVCCameraConfig &new_config);
   void CloseCamera();
 
