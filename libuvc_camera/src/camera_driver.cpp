@@ -112,19 +112,29 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
     cinfo_manager_.loadCameraInfo(new_config.camera_info_url);
 
   if (state_ == kRunning) {
-    // TODO: scanning_mode
-    // TODO: auto_exposure
-    if (new_config.auto_exposure != config_.auto_exposure) {
-      if (uvc_set_ae_mode(devh_, 1 << new_config.auto_exposure))
-        ROS_WARN("Unable to set auto_exposure to %d", new_config.auto_exposure);
+#define PARAM_INT(name, fn, value) if (new_config.name != config_.name) { \
+      int val = (value);                                                \
+      if (uvc_set_##fn(devh_, val)) {                                   \
+        ROS_WARN("Unable to set " #name " to %d", val);                 \
+        new_config.name = config_.name;                                 \
+      }                                                                 \
     }
-    // TODO: auto_exposure_priority
-    // TODO: exposure_absolute
+
+    PARAM_INT(scanning_mode, scanning_mode, new_config.scanning_mode);
+    PARAM_INT(auto_exposure, ae_mode, 1 << new_config.auto_exposure);
+    PARAM_INT(auto_exposure_priority, ae_priority, new_config.auto_exposure_priority);
+    PARAM_INT(exposure_absolute, exposure_abs, new_config.exposure_absolute * 10000);
     // TODO: iris_absolute
-    // TODO: auto_focus
-    // TODO: focus_absolute
-    // TODO: pan_absolute
-    // TODO: tilt_absolute
+    PARAM_INT(auto_focus, focus_auto, new_config.auto_focus ? 1 : 0);
+    PARAM_INT(focus_absolute, focus_abs, new_config.focus_absolute);
+
+    if (new_config.pan_absolute != config_.pan_absolute || new_config.tilt_absolute != config_.tilt_absolute) {
+      if (uvc_set_pantilt_abs(devh_, new_config.pan_absolute, new_config.tilt_absolute)) {
+        ROS_WARN("Unable to set pantilt to %d, %d", new_config.pan_absolute, new_config.tilt_absolute);
+        new_config.pan_absolute = config_.pan_absolute;
+        new_config.tilt_absolute = config_.tilt_absolute;
+      }
+    }
     // TODO: roll_absolute
     // TODO: privacy
     // TODO: backlight_compensation
