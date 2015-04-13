@@ -19,19 +19,19 @@ catkin_package(
   LIBRARIES libuvc_camera_nodelet
   )
 
-include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS} ${libuvc_INCLUDE_DIRS})
+include_directories(include ${libuvc_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LINK_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 add_executable(camera_node src/main.cpp src/camera_driver.cpp)
-target_link_libraries(camera_node ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${libuvc_LIBRARIES})
+target_link_libraries(camera_node ${libuvc_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(camera_node ${PROJECT_NAME}_gencfg)
 
 add_library(libuvc_camera_nodelet src/nodelet.cpp src/camera_driver.cpp)
 add_dependencies(libuvc_camera_nodelet ${libuvc_camera_EXPORTED_TARGETS})
-target_link_libraries(libuvc_camera_nodelet ${Boost_LIBRARIES} ${catkin_LIBRARIES} ${libuvc_LIBRARIES})
+target_link_libraries(libuvc_camera_nodelet ${libuvc_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(libuvc_camera_nodelet ${PROJECT_NAME}_gencfg)
 
 install(TARGETS camera_node libuvc_camera_nodelet
