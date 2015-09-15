@@ -366,6 +366,8 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
     uvc_perror(mode_err, "uvc_get_stream_ctrl_format_size");
     uvc_close(devh_);
     uvc_unref_device(dev_);
+    ROS_ERROR("check video_mode/width/height/frame_rate are available");
+    uvc_print_diag(devh_, NULL);
     return;
   }
 
