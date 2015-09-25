@@ -38,6 +38,7 @@ private:
 
   // Accept a reconfigure request from a client
   void ReconfigureCallback(UVCCameraConfig &config, uint32_t level);
+  enum uvc_frame_format GetVideoMode(std::string vmode);
   // Accept changes in values of automatically updated controls
   void AutoControlsCallback(enum uvc_status_class status_class,
                             int event,

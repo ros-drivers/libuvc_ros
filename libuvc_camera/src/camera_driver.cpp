@@ -165,20 +165,40 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   assert(state_ == kRunning);
   assert(rgb_frame_);
 
-  uvc_error_t conv_ret = uvc_any2rgb(frame, rgb_frame_);
-
-  if (conv_ret != UVC_SUCCESS) {
-    uvc_perror(conv_ret, "Couldn't convert frame to RGB");
-    return;
-  }
-
   sensor_msgs::Image::Ptr image(new sensor_msgs::Image());
   image->width = config_.width;
   image->height = config_.height;
-  image->encoding = "rgb8";
   image->step = image->width * 3;
   image->data.resize(image->step * image->height);
-  memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+
+  if (frame->frame_format == UVC_FRAME_FORMAT_BGR){
+    image->encoding = "bgr8";
+    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+  } else if (frame->frame_format == UVC_FRAME_FORMAT_RGB){
+    image->encoding = "rgb8";
+    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+  } else if (frame->frame_format == UVC_FRAME_FORMAT_UYVY) {
+    image->encoding = "yuv422";
+    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+  } else if (frame->frame_format == UVC_FRAME_FORMAT_YUYV) {
+    // FIXME: uvc_any2bgr does not work on "yuyv" format, so use uvc_yuyv2bgr directly.
+    uvc_error_t conv_ret = uvc_yuyv2bgr(frame, rgb_frame_);
+    if (conv_ret != UVC_SUCCESS) {
+      uvc_perror(conv_ret, "Couldn't convert frame to RGB");
+      return;
+    }
+    image->encoding = "bgr8";
+    memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+  } else {
+    uvc_error_t conv_ret = uvc_any2bgr(frame, rgb_frame_);
+    if (conv_ret != UVC_SUCCESS) {
+      uvc_perror(conv_ret, "Couldn't convert frame to RGB");
+      return;
+    }
+    image->encoding = "bgr8";
+    memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+  }
+
 
   sensor_msgs::CameraInfo::Ptr cinfo(
     new sensor_msgs::CameraInfo(cinfo_manager_.getCameraInfo()));
@@ -257,6 +277,30 @@ void CameraDriver::AutoControlsCallback(
                                status_attribute, data, data_len);
 }
 
+enum uvc_frame_format CameraDriver::GetVideoMode(std::string vmode){
+  if(vmode == "uncompressed") {
+    return UVC_COLOR_FORMAT_UNCOMPRESSED;
+  } else if (vmode == "compressed") {
+    return UVC_COLOR_FORMAT_COMPRESSED;
+  } else if (vmode == "yuyv") {
+    return UVC_COLOR_FORMAT_YUYV;
+  } else if (vmode == "uyvy") {
+    return UVC_COLOR_FORMAT_UYVY;
+  } else if (vmode == "rgb") {
+    return UVC_COLOR_FORMAT_RGB;
+  } else if (vmode == "bgr") {
+    return UVC_COLOR_FORMAT_BGR;
+  } else if (vmode == "mjpeg") {
+    return UVC_COLOR_FORMAT_MJPEG;
+  } else if (vmode == "gray8") {
+    return UVC_COLOR_FORMAT_GRAY8;
+  } else {
+    ROS_ERROR_STREAM("Invalid Video Mode: " << vmode);
+    ROS_WARN_STREAM("Continue using video mode: uncompressed");
+    return UVC_COLOR_FORMAT_UNCOMPRESSED;
+  }
+};
+
 void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
   assert(state_ == kStopped);
 
@@ -280,6 +324,7 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
   }
 
   uvc_error_t open_err = uvc_open(dev_, &devh_);
+
   if (open_err != UVC_SUCCESS) {
     switch (open_err) {
     case UVC_ERROR_ACCESS:
@@ -313,7 +358,7 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
   uvc_stream_ctrl_t ctrl;
   uvc_error_t mode_err = uvc_get_stream_ctrl_format_size(
     devh_, &ctrl,
-    UVC_COLOR_FORMAT_UNCOMPRESSED,
+    GetVideoMode(new_config.video_mode),
     new_config.width, new_config.height,
     new_config.frame_rate);
 
@@ -321,6 +366,8 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
     uvc_perror(mode_err, "uvc_get_stream_ctrl_format_size");
     uvc_close(devh_);
     uvc_unref_device(dev_);
+    ROS_ERROR("check video_mode/width/height/frame_rate are available");
+    uvc_print_diag(devh_, NULL);
     return;
   }
 
