@@ -309,16 +309,35 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
   ROS_INFO("Opening camera with vendor=0x%x, product=0x%x, serial=\"%s\", index=%d",
            vendor_id, product_id, new_config.serial.c_str(), new_config.index);
 
-  uvc_error_t find_err = uvc_find_device(
-    ctx_, &dev_,
+  uvc_device_t **devs;
+
+  uvc_error_t find_err = uvc_find_devices(
+    ctx_, &devs,
     vendor_id,
     product_id,
     new_config.serial.empty() ? NULL : new_config.serial.c_str());
 
-  // TODO: index
-
   if (find_err != UVC_SUCCESS) {
     uvc_perror(find_err, "uvc_find_device");
+    return;
+  }
+
+  // select device by index
+  dev_ = NULL;
+  int dev_idx = 0;
+  while (devs[dev_idx] != NULL) {
+    if(dev_idx == new_config.index) {
+      dev_ = devs[dev_idx];
+    }
+    else {
+      uvc_unref_device(devs[dev_idx]);
+    }
+
+    dev_idx++;
+  }
+
+  if(dev_ == NULL) {
+    ROS_ERROR("Unable to find device at index %d", new_config.index);
     return;
   }
 
@@ -370,10 +389,10 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
     return;
   }
 
-  uvc_error_t stream_err = uvc_start_iso_streaming(devh_, &ctrl, &CameraDriver::ImageCallbackAdapter, this);
+  uvc_error_t stream_err = uvc_start_streaming(devh_, &ctrl, &CameraDriver::ImageCallbackAdapter, this, 0);
 
   if (stream_err != UVC_SUCCESS) {
-    uvc_perror(stream_err, "uvc_start_iso_streaming");
+    uvc_perror(stream_err, "uvc_start_streaming");
     uvc_close(devh_);
     uvc_unref_device(dev_);
     return;
