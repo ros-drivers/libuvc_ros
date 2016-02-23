@@ -35,6 +35,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 #include <std_msgs/Header.h>
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
@@ -167,17 +168,21 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   sensor_msgs::Image::Ptr image(new sensor_msgs::Image());
   image->width = config_.width;
   image->height = config_.height;
-  image->step = image->width * 3;
-  image->data.resize(image->step * image->height);
 
   if (frame->frame_format == UVC_FRAME_FORMAT_BGR){
     image->encoding = "bgr8";
+    image->step = image->width * 3;
+    image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), frame->data, frame->data_bytes);
   } else if (frame->frame_format == UVC_FRAME_FORMAT_RGB){
     image->encoding = "rgb8";
+    image->step = image->width * 3;
+    image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), frame->data, frame->data_bytes);
   } else if (frame->frame_format == UVC_FRAME_FORMAT_UYVY) {
     image->encoding = "yuv422";
+    image->step = image->width * 3;
+    image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), frame->data, frame->data_bytes);
   } else if (frame->frame_format == UVC_FRAME_FORMAT_YUYV) {
     // FIXME: uvc_any2bgr does not work on "yuyv" format, so use uvc_yuyv2bgr directly.
@@ -187,6 +192,8 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
       return;
     }
     image->encoding = "bgr8";
+    image->step = image->width * 3;
+    image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
   } else if (frame->frame_format == UVC_FRAME_FORMAT_MJPEG) {
     // FIXME: uvc_any2bgr does not work on "mjpeg" format, so use uvc_mjpeg2rgb directly.
@@ -196,7 +203,15 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
       return;
     }
     image->encoding = "rgb8";
+    image->step = image->width * 3;
+    image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+  } else if (frame->frame_format == UVC_FRAME_FORMAT_BY8) {
+    // FIXME: only supports most popular bayer pattern format
+    image->encoding = sensor_msgs::image_encodings::BAYER_BGGR8;
+    image->step = image->width * 1;
+    image->data.resize(image->step * image->height);
+    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
   } else {
     uvc_error_t conv_ret = uvc_any2bgr(frame, rgb_frame_);
     if (conv_ret != UVC_SUCCESS) {
@@ -204,6 +219,8 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
       return;
     }
     image->encoding = "bgr8";
+    image->step = image->width * 3;
+    image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
   }
 
@@ -287,25 +304,27 @@ void CameraDriver::AutoControlsCallback(
 
 enum uvc_frame_format CameraDriver::GetVideoMode(std::string vmode){
   if(vmode == "uncompressed") {
-    return UVC_COLOR_FORMAT_UNCOMPRESSED;
+    return UVC_FRAME_FORMAT_UNCOMPRESSED;
   } else if (vmode == "compressed") {
-    return UVC_COLOR_FORMAT_COMPRESSED;
+    return UVC_FRAME_FORMAT_COMPRESSED;
   } else if (vmode == "yuyv") {
-    return UVC_COLOR_FORMAT_YUYV;
+    return UVC_FRAME_FORMAT_YUYV;
   } else if (vmode == "uyvy") {
-    return UVC_COLOR_FORMAT_UYVY;
+    return UVC_FRAME_FORMAT_UYVY;
   } else if (vmode == "rgb") {
-    return UVC_COLOR_FORMAT_RGB;
+    return UVC_FRAME_FORMAT_RGB;
   } else if (vmode == "bgr") {
-    return UVC_COLOR_FORMAT_BGR;
+    return UVC_FRAME_FORMAT_BGR;
   } else if (vmode == "mjpeg") {
-    return UVC_COLOR_FORMAT_MJPEG;
+    return UVC_FRAME_FORMAT_MJPEG;
   } else if (vmode == "gray8") {
-    return UVC_COLOR_FORMAT_GRAY8;
+    return UVC_FRAME_FORMAT_GRAY8;
+  } else if (vmode == "by8") {
+    return UVC_FRAME_FORMAT_BY8;
   } else {
     ROS_ERROR_STREAM("Invalid Video Mode: " << vmode);
     ROS_WARN_STREAM("Continue using video mode: uncompressed");
-    return UVC_COLOR_FORMAT_UNCOMPRESSED;
+    return UVC_FRAME_FORMAT_UNCOMPRESSED;
   }
 };
 
