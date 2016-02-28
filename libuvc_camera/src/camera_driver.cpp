@@ -207,8 +207,8 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
     image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
   } else if (frame->frame_format == UVC_FRAME_FORMAT_BY8) {
-    // FIXME: only supports most popular bayer pattern format
-    image->encoding = sensor_msgs::image_encodings::BAYER_BGGR8;
+    // FIXME: only supports grbg bayer pattern format
+    image->encoding = sensor_msgs::image_encodings::BAYER_GRBG8;
     image->step = image->width * 1;
     image->data.resize(image->step * image->height);
     memcpy(&(image->data[0]), frame->data, frame->data_bytes);
