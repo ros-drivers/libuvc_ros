@@ -215,6 +215,8 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   image->header.stamp = timestamp;
   cinfo->header.frame_id = config_.frame_id;
   cinfo->header.stamp = timestamp;
+  cinfo->height = image->height;
+  cinfo->width = image->width;
 
   cam_pub_.publish(image, cinfo);
 
