@@ -2,8 +2,8 @@
 Changelog for package libuvc_ros
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.8 (2017-06-14)
+------------------
 * add ROS Orphaned Package Maintainers to maintainer tag
 * Contributors: Kei Okada
 
