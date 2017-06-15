@@ -39,6 +39,9 @@
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
 #include <libuvc/libuvc.h>
+#define libuvc_VERSION (libuvc_VERSION_MAJOR * 10000 \
+                      + libuvc_VERSION_MINOR * 100 \
+                      + libuvc_VERSION_PATCH)
 
 namespace libuvc_camera {
 
@@ -126,9 +129,11 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
     PARAM_INT(exposure_absolute, exposure_abs, new_config.exposure_absolute * 10000);
     PARAM_INT(auto_focus, focus_auto, new_config.auto_focus ? 1 : 0);
     PARAM_INT(focus_absolute, focus_abs, new_config.focus_absolute);
+#if libuvc_VERSION     > 00005 /* version > 0.0.5 */
     PARAM_INT(gain, gain, new_config.gain);
     PARAM_INT(iris_absolute, iris_abs, new_config.iris_absolute);
     PARAM_INT(brightness, brightness, new_config.brightness);
+#endif
     
 
     if (new_config.pan_absolute != config_.pan_absolute || new_config.tilt_absolute != config_.tilt_absolute) {
@@ -188,8 +193,10 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
     }
     image->encoding = "bgr8";
     memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+#if libuvc_VERSION     > 00005 /* version > 0.0.5 */
   } else if (frame->frame_format == UVC_FRAME_FORMAT_MJPEG) {
-    // FIXME: uvc_any2bgr does not work on "mjpeg" format, so use uvc_mjpeg2rgb directly.
+    // Enable mjpeg support despite uvs_any2bgr shortcoming
+    //  https://github.com/ros-drivers/libuvc_ros/commit/7508a09f
     uvc_error_t conv_ret = uvc_mjpeg2rgb(frame, rgb_frame_);
     if (conv_ret != UVC_SUCCESS) {
       uvc_perror(conv_ret, "Couldn't convert frame to RGB");
@@ -197,6 +204,7 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
     }
     image->encoding = "rgb8";
     memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+#endif
   } else {
     uvc_error_t conv_ret = uvc_any2bgr(frame, rgb_frame_);
     if (conv_ret != UVC_SUCCESS) {
@@ -320,6 +328,9 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
 
   uvc_device_t **devs;
 
+  // Implement missing index select behavior
+  // https://github.com/ros-drivers/libuvc_ros/commit/4f30e9a0
+#if libuvc_VERSION     > 00005 /* version > 0.0.5 */
   uvc_error_t find_err = uvc_find_devices(
     ctx_, &devs,
     vendor_id,
@@ -349,7 +360,19 @@ void CameraDriver::OpenCamera(UVCCameraConfig &new_config) {
     ROS_ERROR("Unable to find device at index %d", new_config.index);
     return;
   }
+#else
+  uvc_error_t find_err = uvc_find_device(
+    ctx_, &dev_,
+    vendor_id,
+    product_id,
+    new_config.serial.empty() ? NULL : new_config.serial.c_str());
 
+  if (find_err != UVC_SUCCESS) {
+    uvc_perror(find_err, "uvc_find_device");
+    return;
+  }
+
+#endif
   uvc_error_t open_err = uvc_open(dev_, &devh_);
 
   if (open_err != UVC_SUCCESS) {
