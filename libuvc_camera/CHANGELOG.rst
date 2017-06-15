@@ -2,6 +2,11 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* enable to compile with libuvc <= v0.0.5
+* Contributors: Kei Okada
+
 0.0.8 (2017-06-14)
 ------------------
 * add ROS Orphaned Package Maintainers to maintainer tag (`#40 <https://github.com/ros-drivers/libuvc_ros/issues/40>`_)
