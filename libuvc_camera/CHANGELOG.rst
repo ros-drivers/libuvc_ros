@@ -2,8 +2,8 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.9 (2017-06-15)
+------------------
 * enable to compile with libuvc <= v0.0.5
 * Contributors: Kei Okada
 
