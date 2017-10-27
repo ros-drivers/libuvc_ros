@@ -74,6 +74,5 @@ void CameraNodelet::onInit() {
 
 // Register this plugin with pluginlib.
 //
-// parameters are: package, class name, class type, base class type
-PLUGINLIB_DECLARE_CLASS(libuvc_camera, driver,
-                        libuvc_camera::CameraNodelet, nodelet::Nodelet);
+// parameters are: class type, base class type
+PLUGINLIB_EXPORT_CLASS(libuvc_camera::CameraNodelet, nodelet::Nodelet)
