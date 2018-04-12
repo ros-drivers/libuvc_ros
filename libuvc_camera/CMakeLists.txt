@@ -7,6 +7,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp camera_info_manager dynamic_recon
 generate_dynamic_reconfigure_options(cfg/UVCCamera.cfg)
 
 find_package(libuvc REQUIRED)
+message(STATUS "libuvc ${libuvc_VERSION_MAJOR}.${libuvc_VERSION_MINOR}.${libuvc_VERSION_PATCH}")
 
 catkin_package(
   CATKIN_DEPENDS
@@ -19,6 +20,9 @@ catkin_package(
   LIBRARIES libuvc_camera_nodelet
   )
 
+add_definitions(-Dlibuvc_VERSION_MAJOR=${libuvc_VERSION_MAJOR})
+add_definitions(-Dlibuvc_VERSION_MINOR=${libuvc_VERSION_MINOR})
+add_definitions(-Dlibuvc_VERSION_PATCH=${libuvc_VERSION_PATCH})
 include_directories(include ${libuvc_INCLUDE_DIRS} ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 link_directories(${catkin_LINK_DIRS})
 

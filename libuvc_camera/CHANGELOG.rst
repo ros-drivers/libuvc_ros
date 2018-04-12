@@ -2,6 +2,25 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.9 (2017-06-15)
+------------------
+* enable to compile with libuvc <= v0.0.5
+* Contributors: Kei Okada
+
+0.0.8 (2017-06-14)
+------------------
+* add ROS Orphaned Package Maintainers to maintainer tag (`#40 <https://github.com/ros-drivers/libuvc_ros/issues/40>`_)
+* Implement missing index select behavior (`#27 <https://github.com/ros-drivers/libuvc_ros/issues/27>`_)
+* Enable mjpeg support despite uvs_any2bgr shortcoming (`#26 <https://github.com/ros-drivers/libuvc_ros/issues/26>`_)
+* [libuvc_camera/src/camera_driver.cpp] use frame's capture time for   timestamp of ros message instead of callback time (`#24 <https://github.com/ros-drivers/libuvc_ros/issues/24>`_)
+* [libuvc_camera] support multiple video mode (`#22 <https://github.com/ros-drivers/libuvc_ros/issues/22>`_)
+  * [libuvc_camera] add detail error message if no image format support
+  * [libuvc_camera] support multiple video_mode
+* add new parameters in cfg (`#21 <https://github.com/ros-drivers/libuvc_ros/issues/21>`_)
+* Changed defaults: auto_exposure=True, auto_focus=aperture_priority
+* Implemented AE priority, abs exposure/focus, autofocus, pantilt controls
+* Contributors: Yuki Furuta, Josh Villbrandt, Kei Okada, Ken Tossell
+
 0.0.7 (2014-03-06)
 ------------------
 * Removed dependency on the deprecated driver_base package.
