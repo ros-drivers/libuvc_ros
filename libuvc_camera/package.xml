@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>libuvc_camera</name>
-  <version>0.0.9</version>
+  <version>0.0.10</version>
   <description>USB Video Class camera driver</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 

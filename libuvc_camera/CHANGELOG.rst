@@ -2,8 +2,8 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.10 (2018-04-13)
+-------------------
 * Merge pull request `#46 <https://github.com/ros-drivers/libuvc_ros/issues/46>`_ from k-okada/master
   set timestamp
 * set only when frame->capture_time is 0
