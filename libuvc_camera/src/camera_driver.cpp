@@ -185,8 +185,13 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
     image->encoding = "rgb8";
     memcpy(&(image->data[0]), frame->data, frame->data_bytes);
   } else if (frame->frame_format == UVC_FRAME_FORMAT_UYVY) {
-    image->encoding = "yuv422";
-    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+    uvc_error_t conv_ret = uvc_uyvy2bgr(frame, rgb_frame_);
+    if (conv_ret != UVC_SUCCESS) {
+      uvc_perror(conv_ret, "Couldn't convert frame to RGB");
+      return;
+    }
+    image->encoding = "bgr8";
+    memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
   } else if (frame->frame_format == UVC_FRAME_FORMAT_YUYV) {
     // FIXME: uvc_any2bgr does not work on "yuyv" format, so use uvc_yuyv2bgr directly.
     uvc_error_t conv_ret = uvc_yuyv2bgr(frame, rgb_frame_);
