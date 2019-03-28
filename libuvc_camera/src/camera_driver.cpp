@@ -51,6 +51,7 @@ CameraDriver::CameraDriver(ros::NodeHandle nh, ros::NodeHandle priv_nh)
     ctx_(NULL), dev_(NULL), devh_(NULL), rgb_frame_(NULL),
     it_(nh_),
     config_server_(mutex_, priv_nh_),
+    config_(UVCCameraConfig()),
     config_changed_(false),
     cinfo_manager_(nh) {
   cam_pub_ = it_.advertiseCamera("image_raw", 1, false);
