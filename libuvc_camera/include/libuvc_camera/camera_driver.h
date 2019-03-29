@@ -67,6 +67,7 @@ private:
 
   image_transport::ImageTransport it_;
   image_transport::CameraPublisher cam_pub_;
+  ros::Publisher compressed_pub_;
 
   dynamic_reconfigure::Server<UVCCameraConfig> config_server_;
   UVCCameraConfig config_;
