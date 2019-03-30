@@ -146,17 +146,17 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
         new_config.tilt_absolute = config_.tilt_absolute;
       }
     }
-    // TODO: roll_absolute
-    // TODO: privacy
-    // TODO: backlight_compensation
-    // TODO: contrast
-    // TODO: power_line_frequency
-    // TODO: auto_hue
-    // TODO: saturation
-    // TODO: sharpness
-    // TODO: gamma
-    // TODO: auto_white_balance
-    // TODO: white_balance_temperature
+    PARAM_INT(roll_absolute, roll_abs, new_config.roll_absolute);
+    PARAM_INT(privacy, privacy, new_config.privacy);
+    PARAM_INT(backlight_compensation, backlight_compensation, new_config.backlight_compensation);
+    PARAM_INT(contrast, contrast, new_config.contrast);
+    PARAM_INT(focus_absolute, focus_abs, new_config.focus_absolute);
+    PARAM_INT(auto_hue, hue_auto, new_config.auto_hue);
+    PARAM_INT(saturation, saturation, new_config.saturation);
+    PARAM_INT(sharpness, sharpness, new_config.sharpness);
+    PARAM_INT(gamma, gamma, new_config.gamma);
+    PARAM_INT(auto_white_balance, white_balance_temperature_auto, new_config.auto_white_balance);
+    PARAM_INT(white_balance_temperature, white_balance_temperature_auto, new_config.white_balance_temperature);
     // TODO: white_balance_BU
     // TODO: white_balance_RV
   }
