@@ -35,6 +35,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/CompressedImage.h>
 #include <std_msgs/Header.h>
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
@@ -51,9 +52,11 @@ CameraDriver::CameraDriver(ros::NodeHandle nh, ros::NodeHandle priv_nh)
     ctx_(NULL), dev_(NULL), devh_(NULL), rgb_frame_(NULL),
     it_(nh_),
     config_server_(mutex_, priv_nh_),
+    config_(UVCCameraConfig()),
     config_changed_(false),
     cinfo_manager_(nh) {
   cam_pub_ = it_.advertiseCamera("image_raw", 1, false);
+  compressed_pub_ = nh_.advertise<sensor_msgs::CompressedImage>("image_raw/compressed", 1);
 }
 
 CameraDriver::~CameraDriver() {
@@ -133,6 +136,16 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
     PARAM_INT(gain, gain, new_config.gain);
     PARAM_INT(iris_absolute, iris_abs, new_config.iris_absolute);
     PARAM_INT(brightness, brightness, new_config.brightness);
+    PARAM_INT(roll_absolute, roll_abs, new_config.roll_absolute);
+    PARAM_INT(privacy, privacy, new_config.privacy);
+    PARAM_INT(backlight_compensation, backlight_compensation, new_config.backlight_compensation);
+    PARAM_INT(contrast, contrast, new_config.contrast);
+    PARAM_INT(auto_hue, hue_auto, new_config.auto_hue);
+    PARAM_INT(saturation, saturation, new_config.saturation);
+    PARAM_INT(sharpness, sharpness, new_config.sharpness);
+    PARAM_INT(gamma, gamma, new_config.gamma);
+    PARAM_INT(auto_white_balance, white_balance_temperature_auto, new_config.auto_white_balance);
+    PARAM_INT(white_balance_temperature, white_balance_temperature_auto, new_config.white_balance_temperature);
 #endif
     
 
@@ -143,17 +156,7 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
         new_config.tilt_absolute = config_.tilt_absolute;
       }
     }
-    // TODO: roll_absolute
-    // TODO: privacy
-    // TODO: backlight_compensation
-    // TODO: contrast
-    // TODO: power_line_frequency
-    // TODO: auto_hue
-    // TODO: saturation
-    // TODO: sharpness
-    // TODO: gamma
-    // TODO: auto_white_balance
-    // TODO: white_balance_temperature
+    PARAM_INT(focus_absolute, focus_abs, new_config.focus_absolute);
     // TODO: white_balance_BU
     // TODO: white_balance_RV
   }
@@ -172,62 +175,73 @@ void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   assert(state_ == kRunning);
   assert(rgb_frame_);
 
-  sensor_msgs::Image::Ptr image(new sensor_msgs::Image());
-  image->width = config_.width;
-  image->height = config_.height;
-  image->step = image->width * 3;
-  image->data.resize(image->step * image->height);
+  if(config_.video_mode == "compressed") {
+    if(frame->frame_format == UVC_FRAME_FORMAT_MJPEG) {
+      sensor_msgs::CompressedImage::Ptr image(new sensor_msgs::CompressedImage());
+      image->data.resize(frame->data_bytes);
+      image->format = "jpeg";
 
-  if (frame->frame_format == UVC_FRAME_FORMAT_BGR){
-    image->encoding = "bgr8";
-    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
-  } else if (frame->frame_format == UVC_FRAME_FORMAT_RGB){
-    image->encoding = "rgb8";
-    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
-  } else if (frame->frame_format == UVC_FRAME_FORMAT_UYVY) {
-    image->encoding = "yuv422";
-    memcpy(&(image->data[0]), frame->data, frame->data_bytes);
-  } else if (frame->frame_format == UVC_FRAME_FORMAT_YUYV) {
-    // FIXME: uvc_any2bgr does not work on "yuyv" format, so use uvc_yuyv2bgr directly.
-    uvc_error_t conv_ret = uvc_yuyv2bgr(frame, rgb_frame_);
-    if (conv_ret != UVC_SUCCESS) {
-      uvc_perror(conv_ret, "Couldn't convert frame to RGB");
-      return;
+      memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+      compressed_pub_.publish(image);
     }
-    image->encoding = "bgr8";
-    memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
-#if libuvc_VERSION     > 00005 /* version > 0.0.5 */
-  } else if (frame->frame_format == UVC_FRAME_FORMAT_MJPEG) {
-    // Enable mjpeg support despite uvs_any2bgr shortcoming
-    //  https://github.com/ros-drivers/libuvc_ros/commit/7508a09f
-    uvc_error_t conv_ret = uvc_mjpeg2rgb(frame, rgb_frame_);
-    if (conv_ret != UVC_SUCCESS) {
-      uvc_perror(conv_ret, "Couldn't convert frame to RGB");
-      return;
-    }
-    image->encoding = "rgb8";
-    memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
-#endif
   } else {
-    uvc_error_t conv_ret = uvc_any2bgr(frame, rgb_frame_);
-    if (conv_ret != UVC_SUCCESS) {
-      uvc_perror(conv_ret, "Couldn't convert frame to RGB");
-      return;
+    sensor_msgs::Image::Ptr image(new sensor_msgs::Image());
+    image->width = config_.width;
+    image->height = config_.height;
+    image->step = image->width * 3;
+    image->data.resize(image->step * image->height);
+
+    if (frame->frame_format == UVC_FRAME_FORMAT_BGR){
+      image->encoding = "bgr8";
+      memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+    } else if (frame->frame_format == UVC_FRAME_FORMAT_RGB){
+      image->encoding = "rgb8";
+      memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+    } else if (frame->frame_format == UVC_FRAME_FORMAT_UYVY) {
+      image->encoding = "yuv422";
+      memcpy(&(image->data[0]), frame->data, frame->data_bytes);
+    } else if (frame->frame_format == UVC_FRAME_FORMAT_YUYV) {
+      // FIXME: uvc_any2bgr does not work on "yuyv" format, so use uvc_yuyv2bgr directly.
+      uvc_error_t conv_ret = uvc_yuyv2bgr(frame, rgb_frame_);
+      if (conv_ret != UVC_SUCCESS) {
+        uvc_perror(conv_ret, "Couldn't convert frame to RGB");
+        return;
+      }
+      image->encoding = "bgr8";
+      memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+#if libuvc_VERSION     > 00005 /* version > 0.0.5 */
+    } else if (frame->frame_format == UVC_FRAME_FORMAT_MJPEG) {
+      // Enable mjpeg support despite uvs_any2bgr shortcoming
+      //  https://github.com/ros-drivers/libuvc_ros/commit/7508a09f
+      uvc_error_t conv_ret = uvc_mjpeg2rgb(frame, rgb_frame_);
+      if (conv_ret != UVC_SUCCESS) {
+        uvc_perror(conv_ret, "Couldn't convert frame to RGB");
+        return;
+      }
+      image->encoding = "rgb8";
+      memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+#endif
+    } else {
+      uvc_error_t conv_ret = uvc_any2bgr(frame, rgb_frame_);
+      if (conv_ret != UVC_SUCCESS) {
+        uvc_perror(conv_ret, "Couldn't convert frame to RGB");
+        return;
+      }
+      image->encoding = "bgr8";
+      memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
     }
-    image->encoding = "bgr8";
-    memcpy(&(image->data[0]), rgb_frame_->data, rgb_frame_->data_bytes);
+
+
+    sensor_msgs::CameraInfo::Ptr cinfo(
+          new sensor_msgs::CameraInfo(cinfo_manager_.getCameraInfo()));
+
+    image->header.frame_id = config_.frame_id;
+    image->header.stamp = timestamp;
+    cinfo->header.frame_id = config_.frame_id;
+    cinfo->header.stamp = timestamp;
+
+    cam_pub_.publish(image, cinfo);
   }
-
-
-  sensor_msgs::CameraInfo::Ptr cinfo(
-    new sensor_msgs::CameraInfo(cinfo_manager_.getCameraInfo()));
-
-  image->header.frame_id = config_.frame_id;
-  image->header.stamp = timestamp;
-  cinfo->header.frame_id = config_.frame_id;
-  cinfo->header.stamp = timestamp;
-
-  cam_pub_.publish(image, cinfo);
 
   if (config_changed_) {
     config_server_.updateConfig(config_);
