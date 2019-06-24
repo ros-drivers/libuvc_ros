@@ -99,6 +99,16 @@ void CameraDriver::Stop() {
   state_ = kInitial;
 }
 
+bool CameraDriver::ServiceStart(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res) {
+    Start();
+    return true;
+}
+
+bool CameraDriver::ServiceStop(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res) {
+    Stop();
+    return true;
+}
+
 void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t level) {
   boost::recursive_mutex::scoped_lock(mutex_);
 

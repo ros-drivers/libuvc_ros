@@ -10,6 +10,8 @@
 #include <boost/thread/mutex.hpp>
 
 #include <libuvc_camera/UVCCameraConfig.h>
+#include <libuvc_camera/DoStartCamera.h>
+#include <libuvc_camera/DoStopCamera.h>
 
 namespace libuvc_camera {
 
@@ -20,6 +22,10 @@ public:
 
   bool Start();
   void Stop();
+
+
+  bool ServiceStart(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res);
+  bool ServiceStop(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res);
 
 private:
   enum State {
