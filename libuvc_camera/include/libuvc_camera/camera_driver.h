@@ -23,9 +23,10 @@ public:
   bool Start();
   void Stop();
 
-
-  bool ServiceStart(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res);
-  bool ServiceStop(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res);
+  ros::ServiceServer startCameraService;
+  ros::ServiceServer stopCameraService;
+  bool service_start_callback(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res);
+  bool service_stop_callback(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res);
 
 private:
   enum State {

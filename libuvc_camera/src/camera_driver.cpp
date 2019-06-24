@@ -39,6 +39,7 @@
 #include <image_transport/camera_publisher.h>
 #include <dynamic_reconfigure/server.h>
 #include <libuvc/libuvc.h>
+
 #define libuvc_VERSION (libuvc_VERSION_MAJOR * 10000 \
                       + libuvc_VERSION_MINOR * 100 \
                       + libuvc_VERSION_PATCH)
@@ -53,6 +54,8 @@ CameraDriver::CameraDriver(ros::NodeHandle nh, ros::NodeHandle priv_nh)
     config_server_(mutex_, priv_nh_),
     config_changed_(false),
     cinfo_manager_(nh) {
+    stopCameraService = nh.advertiseService("/camera_driver/stop_camera", &CameraDriver::service_stop_callback, this);
+    startCameraService = nh.advertiseService("/camera_driver/start_camera", &CameraDriver::service_start_callback, this);
   cam_pub_ = it_.advertiseCamera("image_raw", 1, false);
 }
 
@@ -99,12 +102,11 @@ void CameraDriver::Stop() {
   state_ = kInitial;
 }
 
-bool CameraDriver::ServiceStart(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res) {
-    Start();
-    return true;
+bool CameraDriver::service_start_callback(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res) {
+    return Start();
 }
 
-bool CameraDriver::ServiceStop(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res) {
+bool CameraDriver::service_stop_callback(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res) {
     Stop();
     return true;
 }
