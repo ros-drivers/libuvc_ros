@@ -103,8 +103,7 @@ void CameraDriver::Stop() {
 }
 
 bool CameraDriver::service_start_callback(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res) {
-    Start();
-    return true;
+    return Start();
 }
 
 bool CameraDriver::service_stop_callback(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res) {
