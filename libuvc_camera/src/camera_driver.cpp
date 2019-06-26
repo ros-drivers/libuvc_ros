@@ -54,8 +54,7 @@ CameraDriver::CameraDriver(ros::NodeHandle nh, ros::NodeHandle priv_nh)
     config_server_(mutex_, priv_nh_),
     config_changed_(false),
     cinfo_manager_(nh) {
-    stopCameraService = nh.advertiseService("/camera_driver/stop_camera", &CameraDriver::service_stop_callback, this);
-    startCameraService = nh.advertiseService("/camera_driver/start_camera", &CameraDriver::service_start_callback, this);
+    enableCamera = nh.advertiseService("/bottom_cam/enabled", &CameraDriver::enabled_callback, this);
   cam_pub_ = it_.advertiseCamera("image_raw", 1, false);
 }
 
@@ -102,15 +101,17 @@ void CameraDriver::Stop() {
   state_ = kInitial;
 }
 
-bool CameraDriver::service_start_callback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
-    res.success = Start();
-    return true;
-}
-
-bool CameraDriver::service_stop_callback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
-    Stop();
+bool CameraDriver::enabled_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
+    if(state_ == kRunning) {
+        Stop();
+        res.message = "Camera stopped";
+    } else if (state_ == kStopped) {
+        Start();
+        res.message = "Camera started";
+    }
     res.success = true;
     return true;
+
 }
 
 void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t level) {
