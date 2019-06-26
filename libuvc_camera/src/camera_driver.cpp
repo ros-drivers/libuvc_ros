@@ -105,7 +105,7 @@ bool CameraDriver::enabled_callback(std_srvs::SetBool::Request &req, std_srvs::S
     if(state_ == kRunning) {
         Stop();
         res.message = "Camera stopped";
-    } else if (state_ == kStopped) {
+    } else if (state_ == kInitial) {
         Start();
         res.message = "Camera started";
     }
