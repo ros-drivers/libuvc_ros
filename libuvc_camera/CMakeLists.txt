@@ -19,12 +19,6 @@ find_package(libuvc REQUIRED COMPONENTS)
 
 message(STATUS "libuvc ${libuvc_VERSION_MAJOR}.${libuvc_VERSION_MINOR}.${libuvc_VERSION_PATCH}")
 
-add_service_files(
-    FILES
-    DoStartCamera.srv
-    DoStopCamera.srv
-)
-
 generate_messages(
     DEPENDENCIES
     std_msgs

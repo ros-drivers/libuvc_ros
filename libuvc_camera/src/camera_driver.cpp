@@ -102,12 +102,14 @@ void CameraDriver::Stop() {
   state_ = kInitial;
 }
 
-bool CameraDriver::service_start_callback(libuvc_camera::DoStartCamera::Request &req, libuvc_camera::DoStartCamera::Request &res) {
-    return Start();
+bool CameraDriver::service_start_callback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
+    res.success = Start();
+    return true;
 }
 
-bool CameraDriver::service_stop_callback(libuvc_camera::DoStopCamera::Request &req, libuvc_camera::DoStopCamera::Response &res) {
+bool CameraDriver::service_stop_callback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) {
     Stop();
+    res.success = true;
     return true;
 }
 
