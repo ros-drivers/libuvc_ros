@@ -62,12 +62,12 @@ void CameraNodelet::onInit() {
   ros::NodeHandle priv_nh(getPrivateNodeHandle());
 
   driver_.reset(new CameraDriver(nh, priv_nh));
-  if (driver_->Start()) {
-    running_ = true;
-  } else {
-    NODELET_ERROR("Unable to open camera.");
-    driver_.reset();
-  }
+//  if (driver_->Start()) {
+//    running_ = true;
+//  } else {
+//    NODELET_ERROR("Unable to open camera.");
+//    driver_.reset();
+//  }
 }
 
 };
