@@ -2,6 +2,21 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.0.10 (2018-04-13)
+-------------------
+* Merge pull request `#46 <https://github.com/ros-drivers/libuvc_ros/issues/46>`_ from k-okada/master
+  set timestamp
+* set only when frame->capture_time is 0
+* set ros::Time::now() because libuvc does not set capture_time (https://github.com/ktossell/libuvc/blob/master/src/stream.c#L1100)
+* Merge pull request `#45 <https://github.com/ros-drivers/libuvc_ros/issues/45>`_ from mikaelarguedas/patch-2
+  update to use non deprecated pluginlib macro
+* update to use non deprecated pluginlib macro
+* Merge pull request `#42 <https://github.com/ros-drivers/libuvc_ros/issues/42>`_ from mikaelarguedas/patch-1
+  fix compiler warning
+* fix compiler warning
+  http://build.ros.org/view/Ldev/job/Ldev__libuvc_ros__ubuntu_xenial_amd64/3/warnings21Result/
+* Contributors: Kei Okada, Mikael Arguedas
+
 0.0.9 (2017-06-15)
 ------------------
 * enable to compile with libuvc <= v0.0.5

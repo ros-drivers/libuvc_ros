@@ -163,6 +163,9 @@ void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t lev
 
 void CameraDriver::ImageCallback(uvc_frame_t *frame) {
   ros::Time timestamp = ros::Time(frame->capture_time.tv_sec, frame->capture_time.tv_usec);
+  if ( timestamp == ros::Time(0) ) {
+    timestamp = ros::Time::now();
+  }
 
   boost::recursive_mutex::scoped_lock lock(mutex_);
 
@@ -246,7 +249,7 @@ void CameraDriver::AutoControlsCallback(
   void *data, size_t data_len) {
   boost::recursive_mutex::scoped_lock lock(mutex_);
 
-  printf("Controls callback. class: %d, event: %d, selector: %d, attr: %d, data_len: %u\n",
+  printf("Controls callback. class: %d, event: %d, selector: %d, attr: %d, data_len: %zu\n",
          status_class, event, selector, status_attribute, data_len);
 
   if (status_attribute == UVC_STATUS_ATTRIBUTE_VALUE_CHANGE) {
