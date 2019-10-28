@@ -8,6 +8,7 @@
 #include <dynamic_reconfigure/server.h>
 #include <camera_info_manager/camera_info_manager.h>
 #include <boost/thread/mutex.hpp>
+#include <std_srvs/SetBool.h>
 
 #include <libuvc_camera/UVCCameraConfig.h>
 
@@ -20,6 +21,10 @@ public:
 
   bool Start();
   void Stop();
+
+  ros::ServiceServer enableCamera;
+
+  bool enabled_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
 
 private:
   enum State {

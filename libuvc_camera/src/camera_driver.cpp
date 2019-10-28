@@ -53,6 +53,7 @@ CameraDriver::CameraDriver(ros::NodeHandle nh, ros::NodeHandle priv_nh)
     config_server_(mutex_, priv_nh_),
     config_changed_(false),
     cinfo_manager_(nh) {
+    enableCamera = nh.advertiseService("/camera_bottom_front_driver/enabled", &CameraDriver::enabled_callback, this);
   cam_pub_ = it_.advertiseCamera("image_raw", 1, false);
 }
 
@@ -97,6 +98,19 @@ void CameraDriver::Stop() {
   ctx_ = NULL;
 
   state_ = kInitial;
+}
+
+bool CameraDriver::enabled_callback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res) {
+    if((state_ == kRunning) && (req.data == false)) {
+        Stop();
+        res.message = "Camera stopped";
+    } else if ((state_ == kInitial) && (req.data == true)) {
+        Start();
+        res.message = "Camera started";
+    }
+    res.success = true;
+    return true;
+
 }
 
 void CameraDriver::ReconfigureCallback(UVCCameraConfig &new_config, uint32_t level) {
