@@ -30,14 +30,14 @@ install:
   # run devel job for a ROS repository with the same name as this repo
   - export REPOSITORY_NAME=`basename $TRAVIS_BUILD_DIR`
   # use the code already checked out by Travis
-  - mkdir -p $JOB_PATH/catkin_workspace/src
-  - cp -R $TRAVIS_BUILD_DIR $JOB_PATH/catkin_workspace/src/
+  - mkdir -p $JOB_PATH/ws/src
+  - cp -R $TRAVIS_BUILD_DIR $JOB_PATH/ws/src/
   # generate the script to run a pre-release job for that target and repo
   - generate_prerelease_script.py https://raw.githubusercontent.com/ros-infrastructure/ros_buildfarm_config/production/index.yaml $ROS_DISTRO_NAME default $OS_NAME $OS_CODE_NAME $ARCH  --output-dir $JOB_PATH
   # run the actual job which involves Docker
   - cd $JOB_PATH; sh ./prerelease.sh -y
 script:
   # get summary of test results
-  - /tmp/catkin/bin/catkin_test_results $JOB_PATH/catkin_workspace/test_results --all
+  - /tmp/catkin/bin/catkin_test_results $JOB_PATH/ws/test_results --all
 notifications:
   email: false
