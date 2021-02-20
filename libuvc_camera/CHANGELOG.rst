@@ -2,8 +2,8 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.11 (2021-02-20)
+-------------------
 * use libuvc-dev for noetic (`#70 <https://github.com/ros-drivers/libuvc_ros/issues/70>`_)
   * update to package format=3
 * Add monochrome format support (`#54 <https://github.com/ros-drivers/libuvc_ros/issues/54>`_)
