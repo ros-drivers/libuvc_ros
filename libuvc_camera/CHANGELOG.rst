@@ -2,6 +2,16 @@
 Changelog for package libuvc_camera
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use libuvc-dev for noetic (`#70 <https://github.com/ros-drivers/libuvc_ros/issues/70>`_)
+  * update to package format=3
+* Add monochrome format support (`#54 <https://github.com/ros-drivers/libuvc_ros/issues/54>`_)
+* use libuvc timestamp correctly (`#53 <https://github.com/ros-drivers/libuvc_ros/issues/53>`_)
+* Fix ROS image output for uyvy uvc frame format input (`#51 <https://github.com/ros-drivers/libuvc_ros/issues/51>`_)
+* Fixed locks so they stay in scope until end of method. (`#36 <https://github.com/ros-drivers/libuvc_ros/issues/36>`_)
+* Contributors: Jason Mercer, Johann Freymuth, Kei Okada, Ryosuke Tajima, Stefan Kohlbrecher
+
 0.0.10 (2018-04-13)
 -------------------
 * Merge pull request `#46 <https://github.com/ros-drivers/libuvc_ros/issues/46>`_ from k-okada/master
