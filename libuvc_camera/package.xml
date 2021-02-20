@@ -17,7 +17,8 @@
   <depend>camera_info_manager</depend>
   <depend>dynamic_reconfigure</depend>
   <depend>image_transport</depend>
-  <depend>libuvc</depend>
+  <depend condition="$ROS_DISTRO != noetic">libuvc</depend>
+  <depend condition="$ROS_DISTRO == noetic">libuvc-dev</depend>
   <depend>nodelet</depend>
   <depend>sensor_msgs</depend>
 
