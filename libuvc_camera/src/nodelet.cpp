@@ -32,7 +32,7 @@
 *  POSSIBILITY OF SUCH DAMAGE.
 *********************************************************************/
 #include <ros/ros.h>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <nodelet/nodelet.h>
 
 #include "libuvc_camera/camera_driver.h"
