@@ -78,7 +78,8 @@ bool CameraDriver::Start() {
 
   state_ = kStopped;
 
-  config_server_.setCallback(boost::bind(&CameraDriver::ReconfigureCallback, this, _1, _2));
+  config_server_.setCallback(boost::bind(&CameraDriver::ReconfigureCallback, this,
+                                         boost::placeholders::_1, boost::placeholders::_2));
 
   return state_ == kRunning;
 }

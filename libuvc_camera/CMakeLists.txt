@@ -9,6 +9,11 @@ generate_dynamic_reconfigure_options(cfg/UVCCamera.cfg)
 find_package(libuvc REQUIRED)
 message(STATUS "libuvc ${libuvc_VERSION_MAJOR}.${libuvc_VERSION_MINOR}.${libuvc_VERSION_PATCH}")
 
+# this is needed to get the libuvc libraries in libuvc 0.0.7
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(libuvc REQUIRED libuvc)
+message(STATUS "libuvc libraries ${libuvc_LIBRARIES}")
+
 catkin_package(
   CATKIN_DEPENDS
     roscpp
