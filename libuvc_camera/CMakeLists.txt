@@ -7,7 +7,13 @@ find_package(catkin REQUIRED COMPONENTS roscpp camera_info_manager dynamic_recon
 generate_dynamic_reconfigure_options(cfg/UVCCamera.cfg)
 
 find_package(libuvc REQUIRED)
-message(STATUS "libuvc ${libuvc_VERSION_MAJOR}.${libuvc_VERSION_MINOR}.${libuvc_VERSION_PATCH}")
+# if libuvc_LIBRARIES are empty, check cmake target
+if(NOT libuvc_LIBRARIES AND TARGET LibUVC::UVCShared)
+  set(libuvc_LIBRARIES LibUVC::UVCShared)
+endif()
+if(NOT libuvc_LIBRARIES)
+  message(FATAL_ERROR "could not find expected libuvc libraries in package")
+endif()
 
 catkin_package(
   CATKIN_DEPENDS
